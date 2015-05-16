@@ -99,14 +99,26 @@ object WikipediaSuggest extends SimpleSwingApplication with ConcreteSwingApi wit
     )
 
     // TO IMPLEMENT
-    val selections: Observable[String] = ???
+    val selections: Observable[String] = button.clicks.map {
+      click => if (suggestionList.selection.items.size == 0) {
+        throw new Error("no items")
+      } else {
+        suggestionList.selection.items.head
+      }
+    }
+
 
     // TO IMPLEMENT
-    val pages: Observable[Try[String]] = ???
+    val pages: Observable[Try[String]] = selections concatRecovered {
+      selectionz => wikiPageResponseStream(selectionz)
+    }
 
     // TO IMPLEMENT
     val pageSubscription: Subscription = pages.observeOn(eventScheduler) subscribe {
-      x => ???
+      x => x match {
+        case Success(pag) => editorpane.text = pag
+        case Failure(ex) => editorpane.text = ex.getMessage
+      }
     }
 
   }
