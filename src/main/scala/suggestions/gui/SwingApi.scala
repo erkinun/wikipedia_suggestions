@@ -54,10 +54,16 @@ trait SwingApi {
     def textValues: Observable[String] = Observable.create { observer =>
       val subscription = Subscription()
 
-      while (subscription.isUnsubscribed) {
-        observer.onNext(field.text)
+      field subscribe {
+        case ValueChanged(tf) =>
+          if (!subscription.isUnsubscribed) {
+            observer.onNext(tf.text)
+          }
+          else {
+            observer.onCompleted()
+          }
       }
-      observer.onCompleted()
+
       subscription
     }
 
@@ -71,11 +77,19 @@ trait SwingApi {
      * @return an observable with a stream of buttons that have been clicked
      */
     def clicks: Observable[Button] = Observable.create { observer =>
+
       val subscription = Subscription()
-      while (subscription.isUnsubscribed) {
-        observer.onNext(button)
+
+      button subscribe {
+        case ButtonClicked(bc) =>
+          if (!subscription.isUnsubscribed) {
+            observer.onNext(bc)
+          }
+          else {
+            observer.onCompleted()
+          }
+
       }
-      observer.onCompleted()
       subscription
     }
   }
